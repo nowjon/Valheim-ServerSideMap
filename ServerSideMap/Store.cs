@@ -19,6 +19,11 @@ namespace ServerSideMap
         private static KeyCode KeyConvertIgnoreDupes;
         
         public static bool ServerPinShare = false;
+        
+        // WebMap configuration
+        public static ConfigEntry<bool> EnableWebMap;
+        public static ConfigEntry<int> WebMapPort;
+        public static ConfigEntry<float> WebMapPlayerUpdateInterval;
 
         public static bool IsSharingMap()
         {

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using UnityEngine;
 
 
 namespace ServerSideMap
@@ -22,10 +24,24 @@ namespace ServerSideMap
             Store.sKeyConvertAll = Config.Bind("Hotkeys", "KeyConvertAll", "", "Hotkey to run /convertpins");
             Store.sKeyConvertIgnoreDupes = Config.Bind("Hotkeys", "KeyConvertIgnoreDupes", "", "Hotkey to run /convertpins ignorelocaldupes");
             
+            // WebMap configuration
+            Store.EnableWebMap = Config.Bind("WebMap", "EnableWebMap", true, "Enable the web-based map interface");
+            Store.WebMapPort = Config.Bind("WebMap", "WebMapPort", 8080, "Port for the web map server");
+            Store.WebMapPlayerUpdateInterval = Config.Bind("WebMap", "PlayerUpdateInterval", 2.0f, "Interval in seconds for updating player positions");
+            
             Store.InitHotkeys();
             Utility.Log("Store1: " + Store.HasKeyConvertAll());
             Utility.Log("Store2: " + Store.HasKeyConvertIgnoreDupes());
 
+            // Initialize WebMap server (only on server)
+            if (Store.EnableWebMap.Value)
+            {
+                // Use a coroutine helper to initialize after a delay
+                var helper = new GameObject("WebMapInitializer");
+                UnityEngine.Object.DontDestroyOnLoad(helper);
+                var initializer = helper.AddComponent<WebMapInitializer>();
+                initializer.Initialize();
+            }
         }
 
         [HarmonyPatch(typeof (ZNet), "OnNewConnection")]
